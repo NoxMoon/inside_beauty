@@ -3,3 +3,4 @@ web_scraper/.ipynb_checkpoints
 data_cleaning/*.csv
 data_cleaning/.ipynb_checkpoints
 eda/.ipynb_checkpoints
+tmp
