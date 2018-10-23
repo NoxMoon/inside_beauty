@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc
 from sklearn.model_selection import KFold, StratifiedKFold
 
 def oof_preds(X_train, y_train, model, folds=None):
@@ -17,6 +19,33 @@ def oof_preds(X_train, y_train, model, folds=None):
         oof_preds_proba[val_idx] = model.predict_proba(val_x)
         
     return oof_preds, oof_preds_proba
+
+def report_auc_by_class(y_test, y_pred_proba, classes=None):
+   
+    n_classes = y_test.shape[1]
+    roc_auc = np.empty(n_classes)
+    
+    if classes is None:
+        classes = ['class '+str(i+1) for i in range(n_classes)]
+
+    plt.figure(figsize=(7,7))
+    for i in range(n_classes):
+        fpr, tpr, _ = roc_curve(y_test[:, i], y_pred_proba[:, i])
+        roc_auc[i] = auc(fpr, tpr)
+        plt.plot(fpr, tpr,
+              label='%s (auc = %0.2f)' % (classes[i], roc_auc[i]))
+
+    plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
+    plt.axis('equal')
+    plt.xlabel('False Positive Rate',fontsize=16)
+    plt.ylabel('True Positive Rate',fontsize=16)
+    plt.legend(loc="lower right", bbox_to_anchor=(1.8,0))
+    plt.xlim([-0.05, 1.05])
+    plt.ylim([-0.05, 1.05])
+    plt.show()
+    
+    return roc_auc
+
 
 def multilable_confusion_matrix(y_true, y_pred, classes=None):
 # confusion matrix for multilabel classification
