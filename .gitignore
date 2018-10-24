@@ -1,5 +1,6 @@
 */.ipynb_checkpoints
 web_scraper/*.csv
+web_scraper/images
 data_cleaning/*.csv
 .DS_Store
 tmp
