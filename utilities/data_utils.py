@@ -33,3 +33,12 @@ def get_ingredient_count(df):
     cols = ingredient_count_df.sum()!=0
     ingredient_count_df = ingredient_count_df.loc[:, cols].astype('int8') 
     return ingredient_count_df
+
+
+def count_pattern(x, pattern):
+    pattern_l = pattern.lower()
+    count = 0
+    for string in literal_eval(x):
+        if string.lower().find(pattern_l)>=0:
+            count += 1
+    return count
