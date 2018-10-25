@@ -10,7 +10,7 @@ def lr_stats(df, cols, y):
     stderrs = []
     for col in cols:
         mask = ~df[col].isnull() & ~df[y].isnull()
-        slope, intercept, r, p_value, stderr = stats.linregress(df[col].loc[mask], df[y].loc[mask])   
+        slope, intercept, r, p_value, stderr = stats.linregress(df[col].loc[mask], df[y].loc[mask])
         slopes.append(slope)
         intercepts.append(intercept)
         rs.append(r)
