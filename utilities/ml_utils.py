@@ -103,34 +103,26 @@ def hamming_score(y_true, y_pred, score_by_sample=False):
         return np.mean(acc_list)
     
     
-def mean_encode(train, val, features_to_encode, target, drop=False, min_sample_leaf=10):
-    train_encode = train.copy(deep=True)
-    val_encode = val.copy(deep=True)
-    for feature in features_to_encode:
-        train_global_mean = train[target].mean()
-        train_encode_map = pd.DataFrame(index = train[feature].unique())
-        train_encode[feature+'_mean_encode'] = np.nan
-        kf = KFold(n_splits=5, shuffle=False)
-        for rest, this in kf.split(train):
-            train_rest_global_mean = train[target].iloc[rest].mean()
-            count = train.iloc[rest].groupby(feature)[target].count()
-            encode_map = train.iloc[rest].groupby(feature)[target].mean()
-            encode_map = (encode_map * count + train_rest_global_mean * min_sample_leaf)/(count + min_sample_leaf)
-            encoded_feature = train.iloc[this][feature].map(encode_map).values
-            train_encode[feature+'_mean_encode'].iloc[this] = train[feature].iloc[this].map(encode_map).values
-            train_encode_map = pd.concat((train_encode_map, encode_map), axis=1, sort=False)
-            train_encode_map.fillna(train_rest_global_mean, inplace=True) 
-            train_encode[feature+'_mean_encode'].fillna(train_rest_global_mean, inplace=True)
-            
-        train_encode_map['avg'] = train_encode_map.mean(axis=1)
-        val_encode[feature+'_mean_encode'] = val[feature].map(train_encode_map['avg'])
-        val_encode[feature+'_mean_encode'].fillna(train_global_mean,inplace=True)
-        #print('correlation',train[target].corr(train_encode[feature+'_mean_encode']))
+def print_product(product_, image_path=None):
+    if type(product_) == pd.core.frame.DataFrame:
+        assert(product.shape[0]==1)
+        product = pd.Series(product_.values[0], index=product_.columns.values)
+    elif type(product_) == pd.core.series.Series:
+        product = product_
+    else:
+        raise TypeError("print product and only handle series or one row dataframe")
         
-    if drop: #drop unencoded features
-        train_encode.drop(features_to_encode, axis=1, inplace=True)
-        val_encode.drop(features_to_encode, axis=1, inplace=True)
-    return train_encode, val_encode
+    print("product_name:", product['product_names'])
+    print("brand:", product['brand'])
+    print("category:", product['product_category'])
+    print("size:", product['size'])
+    print("price:", product['price'])
+    print("ingredient:", product['ingredient']) 
+        
+    if image_path is not None:
+        image = plt.imread(image_path)
+        plt.imshow(image)
+        plt.axis('off')
 
 
 def add_noise(series, noise_level):
