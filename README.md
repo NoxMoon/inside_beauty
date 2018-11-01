@@ -7,6 +7,31 @@ may consider using in replacement of each other.
 - Predict the price of products. Assess the relative importance of ingredients in determining price versus
 other factors such as brand and packaging.
 
+## Table of content
+* Data Acquisition
+[beautypedia_scraper.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/web_scraper/beautypedia_scraper.ipynb),
+[beautypedia_ingredient_scraper.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/web_scraper/beautypedia_ingredient_scraper.ipynb)
+* Data Cleaning
+    * Ingredient Matching
+    * Further Cleaning and Feature Engineering
+    [image_preprocessing.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/data_cleaning/image_preprocessing.ipynb), 
+[logo_image_filter.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/data_cleaning/logo_image_filter.ipynb)
+    * Image Preprocessing and Logo Image Filtering
+    [image_preprocessing.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/data_cleaning/image_preprocessing.ipynb), 
+[logo_image_filter.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/data_cleaning/logo_image_filter.ipynb)
+* Exploratory Data Analysis
+    * Visualization
+    [exploratory_data_analysis.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/eda/exploratory_data_analysis.ipynb)
+    * Statistical testing 
+    [statistical_test_price.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/eda/statistical_test_price.ipynb)
+* Machine Learning
+    * tSNE with ingredient features
+    [tSNE.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/machine_learning/tSNE.ipynb)
+    * Product category classification with ingredient features
+    [product_category_classification.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/machine_learning/product_category_classification.ipynb)
+    * Price Regression 
+    [price_regression.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/machine_learning/price_regression.ipynb)
+[packaging_to_price.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/machine_learning/packaging_to_price.ipynb)
 
 ## Data Acquisition
 
@@ -57,10 +82,11 @@ We follow the following pipeline to cleaning our data and generate more features
     
 Datacleaning notebook can be found here: [data_cleaning.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/data_cleaning/data_cleaning.ipynb)
 
-#### Logo Image Filtering
-Some products on Beautypedia do not have real product photos but a logo for the brand. We build a simple classifier trained on hand picked small data set (with 104 logo samples and 283 non-logo samples) to filter these log images.
+#### Image Preprocessing and Logo Image Filtering
+We preprocessed all images to size 128 * 128. Some products on Beautypedia do not have real product photos but a logo for the brand. We build a simple classifier trained on hand picked small data set (with 104 logo samples and 283 non-logo samples) to filter these log images. We are left with 6324 unique non-logo images.
 
-Image filtering notebook can be found here: [image_preprocessing.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/data_cleaning/image_preprocessing.ipynb)
+Image preprocessing and filtering notebook can be found here: [image_preprocessing.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/data_cleaning/image_preprocessing.ipynb)
+[logo_image_filter.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/data_cleaning/logo_image_filter.ipynb)
 
 ## Exploratory Data Analysis
 
@@ -84,13 +110,13 @@ The notebook can be found here: [exploratory_data_analysis.ipynb](https://github
 
 #### Statistical test
 In graphical EDA, we have seen many factors can contribute to cosmetic products' price. We can also use statistical test to evaluate the significance of these variables. We mainly looked at the following variables:
-* Product Category
-* Brand
+* Product Category (ANOVA and pairwise t-test)
+* Brand (ANOVA and pairwise t-test)
 * Ingredient
-    * Number of ingredient
-    * Ingredient rating
-    * Ingredient category
-    * Individule ingredient
+    * Number of ingredient (slope test)
+    * Ingredient rating (slope test)
+    * Ingredient category (F test)
+    * Individule ingredient (chi2 test)
     
 Statistical test notebook can be found here: [statistical_test_price.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/eda/statistical_test_price.ipynb)
 
@@ -143,15 +169,38 @@ We can also visualize the model predictions using confusion matrix and find the 
 
 Overall, the results do agree with our life experience. The model gets confused on similar categories. For example, daytime moisturizers often have sunscreen ingredients in it, so sometimes our model cannot distiguish sunscreens and daytime moisturizer. Nighttime moisturizer, eye creams and serum are another group that our model get confused a lot in real life, they are all products that are supposed boost hydration and may have some special functions such as anti-aging, reduce hyperpigmentation... It is interesting to see that face masks got confused with cleansers, Exfoliants, and nighttime moisturizer. This is because there are typically two types of face masks: cleansing mask, which may have similar ingredient like cleansers and exfoliants. Another is the so called "sleeping mask", which you can wear overnight, they are typically like a heavy nighttime moisturizer.
 
-Checkout these two miss-predicted face maskes (the first one I have used it as moisturizer personally).
-* [Clinique Moisture Surge™ Overnight Mask](https://www.clinique.com/product/14706/24569/skin-care/masks/moisture-surge-overnight-mask?gclid=CjwKCAjw39reBRBJEiwAO1m0OVFl9Wm4Twl06ADx6fvEDT1Clz9KC6vC9SC9RaMHB1u5YWXHUG9AxRoC25IQAvD_BwE&gclsrc=aw.ds), predicted as Eye Cream & Treatment and Nighttime Moisturizer:
-
-* [Clinique Pep-Start Double Bubble Purifying Mask](https://www.clinique.com/product/14706/45672/skin-care/masks/clinique-pep-start-double-bubble-purifying-mask), predicted as Cleansers.
-
-One limitation of our model is that we didn't quite consider the quantity of ingredients. If we have that information, we can probably do better on toner & face mist, because although the ingredients in toner may look similar as in other products, toners usually contains much more water than other categories.
-
 Product category classification notebook can be found here: [product_category_classification.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/machine_learning/product_category_classification.ipynb)
 
 ### Price Regression
+We built a LightGBM regression model to predict a product's price with both ingredient and non-ingredient features, and assess the relative importance of ingredients in determining price versus other factors such as brand and packaging.
+
+The non-ingredient features include:
+* Brand
+* Product category
+* Size (includes numerical size and size unit)
+* Packaging (CNN model prediction with product images)
+
+We apply target encoding on brand, product category and size unit. The packaging feature is the prediction of CNN model with product images. The price prediction with image features alone has RMSE = \$34.7 for out-of-bag prediction on training set. To ensure no leakage in the model, we use the same fold for CNN model and final prediction.
+
+Ingredient features include:
+* General features such us number of inactive/active ingredient, average ingredient rating.
+* Count of ingredients for each ingredient category
+* 50 selected individual ingredient binary features by chi2 test with price.
+* tf-idf counts on binary ingredient matrix followed by NMF (non-negative matrix factorization), select the top 50 components as features.
+
+Model pipeline:
+<img src="documents/images/price_regression_flow_chart.png" width="700" />
+
+The table below summarized the RMSE, MAE and explained variance when using non-ingredient features or ingredient features alone, and final prediction with all features. The ingredient features are not as powerful as non-ingredient features. The five non-ingredient features alone achieved MAE = \$11.4, adding 171 ingredient features only improved the results slightly. The most powerful features from LightGBM's feature importance are brand and product category.
+
+|error\features| non-ingredient features only  | ingredient features only | all features |
+|-|:--|:--|:--|
+|RMSE(\$) (train cv)| 28.495 |28.916 |27.014 |
+|RMSE(\$) (test )|19.525 | 24.055 | 17.855|
+|MAE(\$) (train cv)|16.648 | 17.936|15.324 |
+|MAE(\$) (test)|11.358 | 15.787| 10.580|
+|explained variance (train cv)|0.283 | 0.262|0.360 |
+|explained variance (test)| 0.611 | 0.408|0.676 |
 
 Price regression notebook can be found here: [price_regression.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/machine_learning/price_regression.ipynb)
+[packaging_to_price.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/machine_learning/packaging_to_price.ipynb)
