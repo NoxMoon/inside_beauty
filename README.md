@@ -7,6 +7,8 @@ may consider using in replacement of each other.
 - Predict the price of products. Assess the relative importance of ingredients in determining price versus
 other factors such as brand and packaging.
 
+Final report of this project can be found [here](https://github.com/NoxMoon/inside_beauty/blob/master/documents/final%20report.ipynb)
+
 ## Table of content
 * Data Acquisition
 [beautypedia_scraper.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/web_scraper/beautypedia_scraper.ipynb),
@@ -32,6 +34,9 @@ other factors such as brand and packaging.
     * Price Regression 
     [price_regression.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/machine_learning/price_regression.ipynb)
 [packaging_to_price.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/machine_learning/packaging_to_price.ipynb)
+* Conclusion
+
+**Packages used**: numpy, scipy, statsmodel, scikit-learn, pandas, lightgbm, pytorch, skimage, seaborn, matplotlib, BeautifulSoup, selenium.
 
 ## Data Acquisition
 
@@ -57,7 +62,7 @@ Webscrapers can be found here: [beautypedia_scraper.ipynb](https://github.com/No
 ## Data Cleaning
 
 #### Ingredient Matching
-Different companies may list the same ingredient in different ways. The most common ingredient water, can appear as “water”, “water (aqua)”, “Water/Aqua/Eau”, “purified water”… in different products. To reduce sparsity of the ingredient features and make use of ingredient information in the ingredient dictionary dataset we obtained, we try to match all ingredients to the 1750 existing ingredients. We use the SequenceMatcher from python difflib package for this purpose. SequenceMatcher provides overall satisfactory matching results with mistakes occasionally, for example, lactic acid is mistakenly matched to acetic acid, zea mays (corn germ) oil is matched to wheat germ oil. Currently, we set a threshold of 0.25 and ingredients with match metric below that will be labelled as unknown ingredients.
+Different companies may list the same ingredient in different ways. The most common ingredient water, can appear as “water”, “water (aqua)”, “Water/Aqua/Eau”, “purified water”… in different products. To reduce sparsity of the ingredient features and make use of ingredient information in the ingredient dictionary dataset we obtained, we try to match all ingredients to the 1750 existing ingredients. We use the [SequenceMatcher](https://docs.python.org/2/library/difflib.html) from python difflib package for this purpose. SequenceMatcher provides overall satisfactory matching results with mistakes occasionally, for example, lactic acid is mistakenly matched to acetic acid, zea mays (corn germ) oil is matched to wheat germ oil. Currently, we set a threshold of 0.25 and ingredients with match metric below that will be labelled as unknown ingredients.
 
 #### Further Cleaning and Feature Engineering
 We follow the following pipeline to cleaning our data and generate more features:
@@ -65,20 +70,14 @@ We follow the following pipeline to cleaning our data and generate more features
 * Merge some categories.
 * Split 'size' column to a number and unit, do unit conversion as necessary
 * Compute 'price/size'
-* Basic cleaning on ingredients:
-    * Split inactive and active ingredient
-    * Convert ingredients to a list
+* Ingredient features:
     * Find number of inactive and active ingredient
-    * Check if the ingredients are in alphabatical order -- most companies like to list ingredient in a descending order of their quantity in the product, some companies just list ingredients alphabatically.
-* Look up ingredients in our ingredient dictionary.
-    * Get a set of all unique ingredients in the products dataframe
-    * Find the match of all these ingredients
-    * For all product, we loop over its ingredient list and look up the matching ingredient, rating and ingredient category
+    * Whether the ingredients are in alphabatical order -- most companies like to list ingredient in a descending order of their quantity in the product, some companies just list ingredients alphabatically.
     * Count how many ingredients in a product have a certain rating (how many ingredient rated as Good/Average etc.)
     * Count how many ingredients in a product belongs to a certain category (how many antioxidants/sunscreen etc.)
     * Count some special categories of ingredients. For example, peptides, ingredients called "xxx extract"...
-    * Compute average ingredient rating. For inactive ingredient, we also consider two kinds of weighted average.
-    * We can make a giant binary matrix indicating all ingredients' presense in each product. We may need dimensionality reduction techniques to preprocess these features for some machine learning models.
+    * Compute average ingredient rating. For inactive ingredient, we also consider two types of weighted average.
+    * Binary matrix indicating all ingredients' presense in each product. We may need dimensionality reduction techniques to preprocess these features for some machine learning models.
     
 Datacleaning notebook can be found here: [data_cleaning.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/data_cleaning/data_cleaning.ipynb)
 
@@ -136,7 +135,7 @@ tSNE plots can be found here: [tSNE.ipynb](https://github.com/NoxMoon/inside_bea
 
 We attempted to predict a product's category using only ingredient related features. As one product may belong to multiple categories, we can do one vs rest classification to tackle the multilabel problem. We use scikit-learn's OneVsRestClassifier for this task.
 
-The ingredients are like the words in documents, thus many techniques people use for text data can be applied here. We can create a "bag of ingredients" matrix, where the matrix elements are binary indicators of whether a certain ingredient exists in a certain product. In addition, we also have "bag of ingredient categories" features that counts how many ingredients of an ingredient category are in a product. As in text data, Naive Bayes can be a good baseline model. We use Bernoullie Naive Bayes for binary features and Multinomial Naive Bayes for count features.
+The ingredients are like the words in documents, thus many techniques for text data can be applied here. We can create a "bag of ingredients" matrix, where the matrix elements are binary indicators of whether a certain ingredient exists in a certain product. In addition, we also have "bag of ingredient categories" features that counts how many ingredients of an ingredient category are in a product. As in text data, Naive Bayes can be a good baseline model. We use Bernoullie Naive Bayes for binary features and Multinomial Naive Bayes for count features.
 
 There are also some general ingredient features that could potentially be useful, such as number of ingredients. We can make use of these features though model stacking: the naive bayes models will serve as first layer models, then the predicted probabilities can be joined with general ingredient features to feed in the final model.
 The training pipeline is as follows:
@@ -167,7 +166,7 @@ We stacked general ingredient features (number of ingredient, average/weighted r
 We can also visualize the model predictions using confusion matrix and find the pairs of categories that our model get confused with.
 ![confmat](documents/images/confmat.png)
 
-Overall, the results do agree with our life experience. The model gets confused on similar categories. For example, daytime moisturizers often have sunscreen ingredients in it, so sometimes our model cannot distiguish sunscreens and daytime moisturizer. Nighttime moisturizer, eye creams and serum are another group that our model get confused a lot in real life, they are all products that are supposed boost hydration and may have some special functions such as anti-aging, reduce hyperpigmentation... It is interesting to see that face masks got confused with cleansers, Exfoliants, and nighttime moisturizer. This is because there are typically two types of face masks: cleansing mask, which may have similar ingredient like cleansers and exfoliants. Another is the so called "sleeping mask", which you can wear overnight, they are typically like a heavy nighttime moisturizer.
+Overall, the results do agree with our life experience. The model gets confused on similar categories. For example, daytime moisturizers often have sunscreen ingredients in it, so sometimes our model cannot distiguish sunscreens and daytime moisturizer. Nighttime moisturizer, eye creams and serum are another group that our model get confused a lot in real life, they are all products that are supposed boost hydration and may have some special functions such as anti-aging, reduce hyperpigmentation... It is interesting to see that face masks got confused with cleansers, Exfoliants, and nighttime moisturizer. This is because there are typically two types of face masks: cleansing mask, which may have similar ingredient like cleansers and exfoliants. Another is the so called "sleeping mask", which you can wear overnight. They are typically like a heavy nighttime moisturizer.
 
 Product category classification notebook can be found here: [product_category_classification.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/machine_learning/product_category_classification.ipynb)
 
@@ -180,27 +179,39 @@ The non-ingredient features include:
 * Size (includes numerical size and size unit)
 * Packaging (CNN model prediction with product images)
 
-We apply target encoding on brand, product category and size unit. The packaging feature is the prediction of CNN model with product images. The price prediction with image features alone has RMSE = \$34.7 for out-of-bag prediction on training set. To ensure no leakage in the model, we use the same fold for CNN model and final prediction.
+We apply target encoding on brand, product category and size unit. The packaging feature is the prediction of CNN model with product images. The price prediction with image features alone has RMSE = \$34.7 for out-of-bag prediction on training set.
 
 Ingredient features include:
 * General features such us number of inactive/active ingredient, average ingredient rating.
-* Count of ingredients for each ingredient category
+* Count of ingredients for each ingredient category.
 * 50 selected individual ingredient binary features by chi2 test with price.
 * tf-idf counts on binary ingredient matrix followed by NMF (non-negative matrix factorization), select the top 50 components as features.
 
 Model pipeline:
 <img src="documents/images/price_regression_flow_chart.png" width="700" />
 
-The table below summarized the RMSE, MAE and explained variance when using non-ingredient features or ingredient features alone, and final prediction with all features. The ingredient features are not as powerful as non-ingredient features. The five non-ingredient features alone achieved MAE = \$11.4, adding 171 ingredient features only improved the results slightly. The most powerful features from LightGBM's feature importance are brand and product category.
+The table below summarized the RMSE, MAE and explained variance when using non-ingredient features or ingredient features alone, and final prediction with all features. The ingredient features are not as powerful as non-ingredient features. The five non-ingredient features alone achieved MAE = \$10.875. Adding 171 ingredient features only improved the results slightly. The most powerful features from LightGBM's feature importance are brand and product category.
 
 |error\features| non-ingredient features only  | ingredient features only | all features |
 |-|:--|:--|:--|
-|RMSE(\$) (train cv)| 28.495 |28.916 |27.014 |
-|RMSE(\$) (test )|19.525 | 24.055 | 17.855|
-|MAE(\$) (train cv)|16.648 | 17.936|15.324 |
-|MAE(\$) (test)|11.358 | 15.787| 10.580|
-|explained variance (train cv)|0.283 | 0.262|0.360 |
-|explained variance (test)| 0.611 | 0.408|0.676 |
+|RMSE(\$) (train cv)| 22.280 |27.445 |21.393 |
+|RMSE(\$) (test )|18.629 | 24.803 | 17.100|
+|MAE(\$) (train cv)|12.322 | 17.130|11.692 |
+|MAE(\$) (test)|10.875 | 16.298| 10.257|
+|explained variance (train cv)|0.610 | 0.408 |0.640 |
+|explained variance (test)| 0.683 | 0.438|0.732 |
 
 Price regression notebook can be found here: [price_regression.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/machine_learning/price_regression.ipynb)
 [packaging_to_price.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/machine_learning/packaging_to_price.ipynb)
+
+### Conclusion
+We have seen our machine learning model can more or less predict the category of a cosmetic product just using the ingredient information. It is able to associate surfactant with cleanser, coloring agents/pigment with lipsticks, AHA(alpha hydroxy acid) or BHA(beta hydroxy acid) with exfoliator, sunscreen agents with daytime moisturizers and sunscreen products... Our model also helps us identify categories that are similar ingredient-wise, such as eye creams, moisturizers and serums. Based on the machine learning results, it would make more sense for a customer to use a sleeping mask as a nighttime moisturizer, but it would not be wise to use foundation as sunscreens.
+
+From our analysis, we do see some ingredient categories that positively correlated with price are the "good" categories according to beautypedia's expert rating, which is reassuring. But also keep in mind that things like fragrance can also make products expensive, not because it is good to the skin, but because it makes the product pleasant to use. In the price regression, we found ingredient features do have predictive power in determining price, although not as powerful as factors such as brand and product category currently. 
+
+We do note there are several limitations in the current model. For example, currently our model is not doing well in classify toners, while in reality, people can easily tell apart a toner based on its texture. The limitation stems from the lacking of quantity information in the ingredient lists. If we know the percentage of water in a product, we can probably do better in distinguishing toners and other products. In the future, we may work on the following aspects to furthur improve the current model:
+* Explore other methods for ingredient matching, such as algorithms based Levenshtein distance.
+* Finding more data from other resourses can help improve the models. Currently, many brands and categories do not have enough products. 
+* Improve the price prediction using product images.
+
+Finally, I want to say that while I believe understanding the formula of cosmetic products and having a knowledge of what's inside the products can make people more rational while spending their money, and have a realistic expectation in the products, I also think it is totally fine to buy products not for need, but for fun! I hope you enjoy browsing though this work and find it interesting!
