@@ -7,7 +7,7 @@ may consider using in replacement of each other.
 - Predict the price of products. Assess the relative importance of ingredients in determining price versus
 other factors such as brand and packaging.
 
-Final report of this project can be found [here](https://github.com/NoxMoon/inside_beauty/blob/master/documents/final%20report.md)
+Final report of this project can be found [here](https://github.com/NoxMoon/inside_beauty/blob/master/documents/final%20report.ipynb)
 
 **Packages used**: numpy, scipy, statsmodel, scikit-learn, pandas, lightgbm, pytorch, skimage, difflib, seaborn, matplotlib, BeautifulSoup, selenium.
 
