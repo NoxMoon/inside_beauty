@@ -1,3 +1,5 @@
+<img src="documents/images/cosmetic3.jpg" width="1200" />
+
 <center><h1> Inside Beauty</h1></center>
 
 This repository is my first capstone project for Springboard data science career track. I explored ∼8000 cosmetic products, with information of brand, category, ingredients, and packaging (product images) scraped from cosmetic review website [beautypedia.com](https://www.beautypedia.com). I am particulaly interested in using ingredients information to work on the following two problems that can help people understand cosmetic products from a chemical perspective:
