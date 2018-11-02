@@ -1,6 +1,6 @@
 <center><h1> Inside Beauty</h1></center>
 
-This repository is my first capstone project for Springboard data science career track. I explored ∼8000 cosmetic products, with information of brand, category, ingredients, and packaging scraped from cosmetic review website [beautypedia.com](https://www.beautypedia.com). I am particulaly interested in using ingredient information to work on the following two problems that can help people understand cosmetic products from a chemical perspective:
+This repository is my first capstone project for Springboard data science career track. I explored ∼8000 cosmetic products, with information of brand, category, ingredients, and packaging (product images) scraped from cosmetic review website [beautypedia.com](https://www.beautypedia.com). I am particulaly interested in using ingredients information to work on the following two problems that can help people understand cosmetic products from a chemical perspective:
 - Classify product categories using ingredient-related features. Identify key ingredients for different product
 categories. Find categories that are similar in formula (e.g. eye creams and moisturizers) that customers
 may consider using in replacement of each other.
@@ -9,7 +9,7 @@ other factors such as brand and packaging.
 
 Final report of this project can be found [here](https://github.com/NoxMoon/inside_beauty/blob/master/documents/final%20report.ipynb)
 
-**Packages used**: numpy, scipy, statsmodel, scikit-learn, pandas, lightgbm, pytorch, skimage, difflib, seaborn, matplotlib, BeautifulSoup, selenium.
+**Packages used**: numpy, scipy, statsmodel, scikit-learn, pandas, lightgbm, pytorch, skimage, difflib, seaborn, matplotlib, BeautifulSoup, requests, selenium.
 
 ## Data Acquisition
 
@@ -21,7 +21,7 @@ Product and ingredient information are scraped from [Beautypedia](https://www.be
     * ingredient: list of ingredients in a product 
     * image: product image
 
-We created three main tables for skin care, body care and makeup products. Products are further divided into subcategories such as moisturizer, serum, sunscreen, exfoliator, etc., and one product may belong to multiple categories. There are 4810, 419, 2513 unique products for skin care, body care and makeups, respectively. 
+We created three main tables for skin care, body care and makeup products, with 4810, 419, 2513 unique products, respectively. Products are further divided into subcategories (moisturizer, serum, sunscreen, exfoliator, etc.).
 
 * Ingredient information of 1750 ingredients.
     * name: ingredient name 
@@ -35,7 +35,7 @@ Webscrapers can be found here: [beautypedia_scraper.ipynb](https://github.com/No
 ## Data Cleaning
 
 #### Ingredient Matching
-Different companies may list the same ingredient in different ways. For example, water can appear as “water”, “water (aqua)”, “Water/Aqua/Eau”, “purified water”… in different products. To reduce sparsity of the ingredient features and make use of ingredient information in the ingredient dictionary dataset we obtained, we used the [SequenceMatcher](https://docs.python.org/2/library/difflib.html) to match all ingredients to the 1750 existing ingredients. This provides overall satisfactory matching results with mistakes occasionally (e.g. lactic acid --> acetic acid).
+Different companies may list the same ingredient in different ways. For example, water can appear as “water”, “water (aqua)”, “Water/Aqua/Eau”, “purified water”… in different products. To reduce sparsity of the ingredient features and make use of ingredient information in the ingredient dictionary dataset we obtained, we used the [SequenceMatcher](https://docs.python.org/2/library/difflib.html) to find match of all ingredients to the 1750 ingredients in the ingredient dataframe. This provides overall satisfactory matching results with mistakes occasionally (e.g. lactic acid --> acetic acid).
 
 #### Further Cleaning and Feature Engineering
 We followed the following pipeline to cleaning our data and generate more features:
@@ -55,7 +55,7 @@ We followed the following pipeline to cleaning our data and generate more featur
 Data-cleaning notebook can be found here: [data_cleaning.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/data_cleaning/data_cleaning.ipynb)
 
 #### Image Preprocessing and Logo Image Filtering
-Some products on Beautypedia do not have real product photos but a logo of the brand. We built a simple classifier trained on hand picked small data set (with 104 logo samples and 283 non-logo samples) to filter these log images. We are left with 6324 unique non-logo images.
+Some products on Beautypedia do not have real product photos but a logo of the brand. We built a simple classifier trained on hand-picked small data set (with 104 logo samples and 283 non-logo samples) to filter these log images. We are left with 6324 unique non-logo images.
 
 Image preprocessing and filtering notebook can be found here: [image_preprocessing.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/data_cleaning/image_preprocessing.ipynb)
 [logo_image_filter.ipynb](https://github.com/NoxMoon/inside_beauty/blob/master/data_cleaning/logo_image_filter.ipynb)
@@ -63,7 +63,7 @@ Image preprocessing and filtering notebook can be found here: [image_preprocessi
 ## Exploratory Data Analysis
 
 #### Visualization
-We explored the following aspects with graphical EDA:
+We explored the following aspects in initial EDA:
 * Unique products
 * Missing values
 * Number of products by category
@@ -106,13 +106,13 @@ tSNE plots can be found here: [tSNE.ipynb](https://github.com/NoxMoon/inside_bea
 
 We attempted to predict a product's category using only ingredient related features. As one product may belong to multiple categories, we used scikit-learn's OneVsRestClassifier to tackle the multilabel problem.
 
-The ingredients are like the words in documents, thus many techniques for text data can be applied here. We created a "bag of ingredients" matrix, where the matrix elements are binary indicators of whether a certain ingredient exists in a certain product. In addition, we had "bag of ingredient categories" features that counts how many ingredients of an ingredient category are in a product. We used Bernoullie Naive Bayes for binary features and Multinomial Naive Bayes for count features. We then make use of general ingredient features (number of ingredients/rating) through model stacking: the Naive Bayes models will serve as first layer models, then the predicted probabilities can be joined with general ingredient features to feed in the final model.
+The ingredients are like the words in documents, thus many techniques for text data can be applied here. We created a "bag of ingredients" matrix, where the matrix elements are binary indicators of whether a certain ingredient exists in a certain product. In addition, we had "bag of ingredient categories" features that counts how many ingredients of an ingredient category are in a product. We used Bernoullie Naive Bayes for binary features and Multinomial Naive Bayes for count features. We then make use of general ingredient features (number of ingredients/rating) through model stacking: the Naive Bayes models serve as first layer models, then the predicted probabilities can be joined with general ingredient features to feed in the final model.
 
 The training pipeline is as follows:
 
 <img src="documents/images/product_category_flow_chart.png" width="800" />
 
-The Bernoulli Naive Bayes serves as a good baseline model and achieves 0.3724 Hamming score on training set with cross validation, and 0.3588 on test set. It also allows us to indentify the key ingredient associated with each category. For example:
+The Bernoulli Naive Bayes is a good baseline model and achieved 0.3724 Hamming score on training set with cross validation, and 0.3588 on test set. It also allows us to indentify the key ingredient associated with each category. For example:
 
 * Acne Treatment products: benzoyl peroxide, BHA
 * Cleansers: solium xxx (sodium salt of fatty acids)
